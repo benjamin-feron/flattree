@@ -95,6 +95,7 @@ var tree = { // tree can either be object or array
 flatten(tree, {
     openNodes: ['fruit', 'banana'],
     openAllNodes: false, // Defaults to false
+    childrenAttribute: 'children', // Defaults to 'children'
     throwOnEerror: false // Defaults to false
 });
 // → [Node { id: 'fruit', ...}, Node { id: 'apple', ...}, Node { id: 'banana', ...}, Node { id: 'cherry', ...}]

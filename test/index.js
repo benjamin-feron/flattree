@@ -228,13 +228,13 @@ test('[flatten] Nested hierarchies', (t) => {
             found = found + label + ' (' + path + ')' + '\n';
             return;
         }
-        
+
         const prefix = prefixMask.substr(1).split('')
             .map(s => (Number(s) === 0) ? '  ' : '| ')
             .join('');
 
-        found = found + 
-            prefix + 
+        found = found +
+            prefix +
             (node.isLastChild() ? '└' : '├') + '─' +
             (node.hasChildren() && open ? '┬' : '─') + ' ' +
             label +
@@ -272,7 +272,7 @@ test('[flatten] Single root node', (t) => {
     flatten(tree, { openNodes: openNodes }).forEach((node, index) => {
         const { label = '', state = {}, children = [] } = node;
         const { open } = state;
-      
+
         let padding = pad('', state.depth * 2, ' ');
         if (node.hasChildren() && open) {
             padding += '- ';
@@ -314,7 +314,7 @@ test('[flatten] Multiple root nodes', (t) => {
     flatten(tree.children, { openNodes: openNodes }).forEach((node, index) => {
         const { label = '', state = {}, children = [] } = node;
         const { open } = state;
-      
+
         let padding = pad('', state.depth * 2, ' ');
         if (node.hasChildren() && open) {
             padding += '- ';
@@ -323,7 +323,7 @@ test('[flatten] Multiple root nodes', (t) => {
         } else {
             padding += '  ';
         }
-      
+
         found = found + padding + label + ' (' + state.path + ')' + '\n';
     });
 
@@ -527,7 +527,7 @@ test('[flatten] Corrupted parent node', (t) => {
             parent.parent.state.total = 0;
             const originalConsoleLogger = console.log;
             console.log = (msg) => {
-                t.same(msg, 'Error: The node might have been corrupted: id=%s, parent=%s, children=%s, state=%s');
+                t.same(msg, 'Error: The node might have been corrupted: id=%s, parent=%s, %s=%s, state=%s');
             };
             flatten(node, { openAllNodes: true, throwOnError: false });
             console.log = originalConsoleLogger;
