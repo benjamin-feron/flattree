@@ -18,17 +18,20 @@ const flatten = (nodes = [], options = {}) => {
 
     options.openAllNodes = !!options.openAllNodes;
     options.openNodes = options.openNodes || [];
+    options.childrenAttribute = options.childrenAttribute || 'children';
     options.throwOnError = !!options.throwOnError;
 
     { // root node
         let firstNode = (nodes.length > 0) ? nodes[0] : null;
         let parentNode = firstNode ? firstNode.parent : null;
         if (parentNode && !(parentNode instanceof Node)) {
-            parentNode = new Node(parentNode);
+            parentNode = new Node(parentNode, {
+                childrenAttribute: options.childrenAttribute
+            });
         }
         const rootNode = parentNode || new Node({ // defaults
             parent: null,
-            children: nodes,
+            [options.childrenAttribute]: nodes,
             state: {
                 depth: -1,
                 open: true, // always open
@@ -36,6 +39,8 @@ const flatten = (nodes = [], options = {}) => {
                 prefixMask: '',
                 total: 0
             }
+        }, {
+            childrenAttribute: options.childrenAttribute
         });
 
         if (rootNode === parentNode) {
@@ -57,10 +62,11 @@ const flatten = (nodes = [], options = {}) => {
                     if (options.throwOnError) {
                         throw new Error('The node might have been corrupted: id=' + JSON.stringify(p.id) + ', state=' + JSON.stringify(p.state));
                     } else {
-                        console && console.log('Error: The node might have been corrupted: id=%s, parent=%s, children=%s, state=%s',
+                        console && console.log('Error: The node might have been corrupted: id=%s, parent=%s, %s=%s, state=%s',
                             JSON.stringify(p.id),
                             p.parent,
-                            p.children,
+                            options.childrenAttribute,
+                            p[options.childrenAttribute],
                             JSON.stringify(p.state),
                         );
                     }
@@ -76,16 +82,18 @@ const flatten = (nodes = [], options = {}) => {
     while (stack.length > 0) {
         let [current, depth, index] = stack.pop();
 
-        while (index < current.children.length) {
-            let node = current.children[index];
+        while (index < current[options.childrenAttribute].length) {
+            let node = current[options.childrenAttribute][index];
             if (!(node instanceof Node)) {
-                node = new Node(node);
+                node = new Node(node, {
+                    childrenAttribute: options.childrenAttribute
+                });
             }
             node.parent = current;
-            node.children = node.children || [];
+            node[options.childrenAttribute] = node[options.childrenAttribute] || [];
 
-            // Ensure parent.children[index] is equal to the current node
-            node.parent.children[index] = node;
+            // Ensure parent[options.childrenAttribute][index] is equal to the current node
+            node.parent[options.childrenAttribute][index] = node;
 
             const path = current.state.path + '.' + index;
             const open = node.hasChildren() && (() => {
